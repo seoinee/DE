@@ -15,31 +15,31 @@ import org.apache.hadoop.util.GenericOptionsParser;
 public class UBERStudent20200953 {
 
 	public static class UBERMapper extends Mapper<Object, Text, Text, Text> {
-		private Text regionDay = new Text();
-		private Text tripsVehicles = new Text();
+		private Text region_day = new Text();
+		private Text trip_vehicle = new Text();
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString(), ",");
 			String region = itr.nextToken();
-			String date = itr.nextToken();
-			
-			itr2 = new StringTokenizer(date, "/");
-			int month = Integer.parseInt(itr2.nextToken());
-			int day = Integer.parseInt(itr2.nextToken());
-			int year = Integer.parseInt(itr2.nextToken());
+			String date = itr.nextToken(); 
+			String vehicles = itr.nextToken(); 
+        		String trips = itr.nextToken();
 			
 			String[] days = {"MON", "TUE", "WED", "THR", "FRI", "SAT", "SUN"};
-			LocalDate dt = LocalDate.of(year, month, day);
-			DayOfWeek dayOfWeek = dt.getDayOfWeek();
-			int dayOfWeekNumber = dayOfWeek.getValue();
-			String d = days[dayOfWeekNumber - 1];
 			
-			String vehicles = itr.nextToken();
-        		String trips = itr.nextToken();
+			itr = new StringTokenizer(date, "/");
+			int month = Integer.parseInt(itr.nextToken());
+			int day = Integer.parseInt(itr.nextToken());
+			int year = Integer.parseInt(itr.nextToken());
 
-			regionDay.set(region + "," + d);
-			tripsVehicles.set(trips + "," + vehicles);
-			context.write(regionDay, tripsVehicles);
+			LocalDate date2 = LocalDate.of(year, month, day);
+			DayOfWeek dayOfWeek = date2.getDayOfWeek();
+			int dayOfWeekNumber = dayOfWeek.getValue();
+		        String dayStr = days[dayOfWeekNumber - 1];
+
+			region_day.set(region + "," + dayStr);
+			trip_vehicle.set(trips + "," + vehicles);
+			context.write(region_day, trip_vehicle);
 		}
 	}
 
@@ -47,14 +47,16 @@ public class UBERStudent20200953 {
 		private Text result = new Text();
 
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-			private long tripsVal= 0;
-			private long vehiclesVal = 0;
+			long trips = 0;
+			long vehicles = 0;
+
 			for (Text val : values) {
-				StringTokenizer itr = new StringTokenizer(val.toString(), ",");
-				tripsVal += Long.parseLong(itr.nextToken());
-				vehiclesVal += Long.parseLong(itr.nextToken());
+				String trip_vehicle = val.toString();
+				StringTokenizer itr = new StringTokenizer(trip_vehicle, ",");
+				trips += Long.parseLong(itr.nextToken());
+				vehicles += Long.parseLong(itr.nextToken());
 			}
-			result.set(tripsVal + "," + vehiclesVal);
+			result.set(trips + "," + vehicles);
 			context.write(key, result);
 		}
 	}
