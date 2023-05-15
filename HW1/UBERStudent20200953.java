@@ -32,8 +32,8 @@ public class UBERStudent20200953 {
 			int year = Integer.parseInt(itr2.nextToken());
 
 			LocalDate date2 = LocalDate.of(year, month, day);
-			DayOfWeek dayOfWeek = date2.getDayOfWeek();
-			int dayOfWeekNumber = dayOfWeek.getValue();
+			DayOfWeek dow = date2.getDayOfWeek();
+			int dayOfWeekNumber = dow.getValue();
 		        String dayStr = days[dayOfWeekNumber - 1];
 
 			region_day.set(region + "," + dayStr);
@@ -44,16 +44,16 @@ public class UBERStudent20200953 {
 
 	public static class UBERReducer extends Reducer<Text, Text, Text, Text> {
 		private Text result = new Text();
-		private long trips = 0;
-		private long vehicles = 0;
+		private long tripsRslt = 0;
+		private long vehiclesRslt = 0;
 
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 			for (Text val : values) {
 				StringTokenizer itr = new StringTokenizer(val.toString(), ",");
-				trips += Long.parseLong(itr.nextToken());
-				vehicles += Long.parseLong(itr.nextToken());
+				tripsRslt += Long.parseLong(itr.nextToken());
+				vehiclesRslt += Long.parseLong(itr.nextToken());
 			}
-			result.set(trips + "," + vehicles);
+			result.set(tripsRslt + "," + vehiclesRslt);
 			context.write(key, result);
 		}
 	}
