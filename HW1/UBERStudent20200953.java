@@ -22,19 +22,20 @@ public class UBERStudent20200953 {
 			StringTokenizer itr = new StringTokenizer(value.toString(), ",");
 			String region = itr.nextToken();
 			String date = itr.nextToken();
+			
+			itr2 = new StringTokenizer(date, "/");
+			int month = Integer.parseInt(itr2.nextToken());
+			int day = Integer.parseInt(itr2.nextToken());
+			int year = Integer.parseInt(itr2.nextToken());
+			
+			String[] days = {"MON", "TUE", "WED", "THR", "FRI", "SAT", "SUN"};
+			LocalDate dt = LocalDate.of(year, month, day);
+			DayOfWeek dayOfWeek = dt.getDayOfWeek();
+			int dayOfWeekNumber = dayOfWeek.getValue();
+			String d = days[dayOfWeekNumber - 1];
+			
 			String vehicles = itr.nextToken();
         		String trips = itr.nextToken();
-
-			itr = new StringTokenizer(date, "/");
-			int month = Integer.parseInt(itr.nextToken());
-			int day = Integer.parseInt(itr.nextToken());
-			int year = Integer.parseInt(itr.nextToken());
-
-			String[] days = {"MON", "TUE", "WED", "THR", "FRI", "SAT", "SUN"};
-			
-			DayOfWeek dayOfWeek = date.getDayOfWeek();
-			int dayOfWeekNumber = dayOfWeek.getValue();
-		        String d = days[dayOfWeekNumber - 1];
 
 			regionDay.set(region + "," + d);
 			tripsVehicles.set(trips + "," + vehicles);
@@ -46,17 +47,14 @@ public class UBERStudent20200953 {
 		private Text result = new Text();
 
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-			private int tripsVal= 0;
-			private int vehiclesVal = 0;
+			private long tripsVal= 0;
+			private long vehiclesVal = 0;
 			for (Text val : values) {
-				String line = val.toString();
-				String[] tv = line.split(",");
-				int trips = Integer.parseInt(tv[0]);
-				int vehicles = Integer.parseInt(tv[1]);
-				tripsVal += trips;
-				vehiclesVal += vehicle;
+				StringTokenizer itr = new StringTokenizer(val.toString(), ",");
+				tripsVal += Long.parseLong(itr.nextToken());
+				vehiclesVal += Long.parseLong(itr.nextToken());
 			}
-			result.set(Integer.toString(tripsVal) + "," + Integer.toString(vehiclesVal));
+			result.set(tripsVal + "," + vehiclesVal);
 			context.write(key, result);
 		}
 	}
