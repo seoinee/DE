@@ -13,7 +13,6 @@ import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 public class UBERStudent20200953 {
-
 	public static class UBERMapper extends Mapper<Object, Text, Text, Text> {
 		private Text region_day = new Text();
 		private Text trip_vehicle = new Text();
@@ -27,10 +26,10 @@ public class UBERStudent20200953 {
 			
 			String[] days = {"MON", "TUE", "WED", "THR", "FRI", "SAT", "SUN"};
 			
-			itr = new StringTokenizer(date, "/");
-			int month = Integer.parseInt(itr.nextToken());
-			int day = Integer.parseInt(itr.nextToken());
-			int year = Integer.parseInt(itr.nextToken());
+			itr2 = new StringTokenizer(date, "/");
+			int month = Integer.parseInt(itr2.nextToken());
+			int day = Integer.parseInt(itr2.nextToken());
+			int year = Integer.parseInt(itr2.nextToken());
 
 			LocalDate date2 = LocalDate.of(year, month, day);
 			DayOfWeek dayOfWeek = date2.getDayOfWeek();
@@ -45,14 +44,12 @@ public class UBERStudent20200953 {
 
 	public static class UBERReducer extends Reducer<Text, Text, Text, Text> {
 		private Text result = new Text();
+		private long trips = 0;
+		private long vehicles = 0;
 
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-			long trips = 0;
-			long vehicles = 0;
-
 			for (Text val : values) {
-				String trip_vehicle = val.toString();
-				StringTokenizer itr = new StringTokenizer(trip_vehicle, ",");
+				StringTokenizer itr = new StringTokenizer(val.toString(), ",");
 				trips += Long.parseLong(itr.nextToken());
 				vehicles += Long.parseLong(itr.nextToken());
 			}
