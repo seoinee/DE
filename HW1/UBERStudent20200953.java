@@ -16,7 +16,7 @@ public class UBERStudent20200953 {
 
 	public static class UBERMapper extends Mapper<Object, Text, Text, Text> {
 		private Text region_day = new Text();
-		private Text trip_vehicle = new Text();
+		private Text trips_vehicles = new Text();
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString(), ",");
@@ -27,10 +27,10 @@ public class UBERStudent20200953 {
 			
 			String[] days = {"MON", "TUE", "WED", "THR", "FRI", "SAT", "SUN"};
 			
-			itr2 = new StringTokenizer(date, "/");
-			int month = Integer.parseInt(itr2.nextToken());
-			int day = Integer.parseInt(itr2.nextToken());
-			int year = Integer.parseInt(itr2.nextToken());
+			itr = new StringTokenizer(date, "/");
+			int month = Integer.parseInt(itr.nextToken());
+			int day = Integer.parseInt(itr.nextToken());
+			int year = Integer.parseInt(itr.nextToken());
 
 			LocalDate date2 = LocalDate.of(year, month, day);
 			DayOfWeek dayOfWeek = date2.getDayOfWeek();
@@ -38,8 +38,8 @@ public class UBERStudent20200953 {
 		       String dayStr = days[dayOfWeekNumber - 1];
 
 			region_day.set(region + "," + dayStr);
-			trip_vehicle.set(trips + "," + vehicles);
-			context.write(region_day, trip_vehicle);
+			trips_vehicles.set(trips + "," + vehicles);
+			context.write(region_day, trips_vehicles);
 		}
 	}
 
@@ -51,7 +51,8 @@ public class UBERStudent20200953 {
 			long vehiclesRslt = 0;
 
 			for (Text val : values) {
-				StringTokenizer itr = new StringTokenizer(val.toString(), ",");
+				String tv = val.toString();
+				StringTokenizer itr = new StringTokenizer(tv, ",");
 				tripsRslt += Long.parseLong(itr.nextToken());
 				vehiclesRslt += Long.parseLong(itr.nextToken());
 			}
