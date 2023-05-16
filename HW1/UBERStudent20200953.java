@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 import java.time.DayOfWeek;
-import java.time.LocalDate; 
+import java.time.LocalDate;
 
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.fs.FileSystem;
@@ -13,6 +13,7 @@ import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 public class UBERStudent20200953 {
+
 	public static class UBERMapper extends Mapper<Object, Text, Text, Text> {
 		private Text region_day = new Text();
 		private Text trip_vehicle = new Text();
@@ -20,8 +21,8 @@ public class UBERStudent20200953 {
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString(), ",");
 			String region = itr.nextToken();
-			String date = itr.nextToken(); 
-			String vehicles = itr.nextToken(); 
+			String date = itr.nextToken();
+			String vehicles = itr.nextToken();
         		String trips = itr.nextToken();
 			
 			String[] days = {"MON", "TUE", "WED", "THR", "FRI", "SAT", "SUN"};
@@ -32,9 +33,9 @@ public class UBERStudent20200953 {
 			int year = Integer.parseInt(itr2.nextToken());
 
 			LocalDate date2 = LocalDate.of(year, month, day);
-			DayOfWeek dow = date2.getDayOfWeek();
-			int dayOfWeekNumber = dow.getValue();
-		        String dayStr = days[dayOfWeekNumber - 1];
+			DayOfWeek dayOfWeek = date2.getDayOfWeek();
+			int dayOfWeekNumber = dayOfWeek.getValue();
+		       String dayStr = days[dayOfWeekNumber - 1];
 
 			region_day.set(region + "," + dayStr);
 			trip_vehicle.set(trips + "," + vehicles);
@@ -44,10 +45,11 @@ public class UBERStudent20200953 {
 
 	public static class UBERReducer extends Reducer<Text, Text, Text, Text> {
 		private Text result = new Text();
-		private long tripsRslt = 0;
-		private long vehiclesRslt = 0;
 
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+			long tripsRslt = 0;
+			long vehiclesRslt = 0;
+
 			for (Text val : values) {
 				StringTokenizer itr = new StringTokenizer(val.toString(), ",");
 				tripsRslt += Long.parseLong(itr.nextToken());
@@ -78,3 +80,4 @@ public class UBERStudent20200953 {
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
+
