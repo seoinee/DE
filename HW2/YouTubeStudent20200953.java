@@ -106,7 +106,7 @@ public class YouTubeStudent20200953 {
 		
 		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		if (otherArgs.length != 3) {
-			System.err.println("Usage: YouTubeStudent20170953 <in> <out>");
+			System.err.println("Usage: YouTubeStudent20200953 <in> <out>");
 			System.exit(2);
 		}
 		conf.setInt("topK", Integer.valueOf(otherArgs[2]));
