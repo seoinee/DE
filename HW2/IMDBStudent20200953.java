@@ -137,8 +137,8 @@ public class IMDBStudent20200953 {
                 }
 
                 if (isFantasy) {
-                    outputKey = new DoubleString(id, "Movie");
-                    outputValue.set("Movie:" + title);
+                    outputKey = new DoubleString(id, "Movies");
+                    outputValue.set("Movies::" + title);
                     context.write( outputKey, outputValue );
                 }
 
@@ -146,8 +146,8 @@ public class IMDBStudent20200953 {
                 String id = splt[1];
                 String rating = splt[2];
 
-                outputKey = new DoubleString(id, "Rating");
-                outputValue.set("Rating:" + rating);
+                outputKey = new DoubleString(id, "Ratings");
+                outputValue.set("Ratings::" + rating);
                 context.write( outputKey, outputValue );
             }
         }
@@ -164,16 +164,15 @@ public class IMDBStudent20200953 {
         private Comparator<IMDB> comp = new IMDBComparator();
         private int topK;
         public void reduce(DoubleString key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-            String title = "";
             double total = 0;
             int count = 0;
-
+            String title = "";
             for (Text val : values) {
-                String[] splt = val.toString().split(":");
+                String[] splt = val.toString().split("::");
                 String file_type = splt[0];
 
                 if (count == 0) {
-                    if (!file_type.equals("Movie")) {
+                    if (!file_type.equals("Movies")) {
                         break;
                     }
                     title = splt[1];
@@ -227,4 +226,3 @@ public class IMDBStudent20200953 {
         FileSystem.get(job.getConfiguration()).delete( new Path(otherArgs[1]), true);
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
-}
