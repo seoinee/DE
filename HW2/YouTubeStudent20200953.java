@@ -1,6 +1,4 @@
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.fs.FileSystem;
@@ -14,36 +12,38 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 public class YouTubeStudent20200953 {
 	public static class Video {
-		public String genre;
-		public double average;
+		public String category;
+		public double rating;
 	
-		public Video(String genre, double average) {
-			this.genre = genre;
-			this.average = average;
+		public Video(String category, double rating) {
+			this.category = category;
+			this.rating = rating;
 		}
 	
-		public String getGenre() {
-			return this.genre;
+		public String getCategory() {
+			return this.category;
 		}
 	
-		public double getAverage() {
-			return this.average;
+		public double getRating() {
+			return this.rating;
 		}	
 	}
 
 
 	public static class AverageComparator implements Comparator<Video> {
-		public int compare(Video x, Video y) {
-			if ( x.average > y.average ) return 1;
-			if ( x.average < y.average ) return -1;
+		public int compare(Video v1, Video v2) {
+			if ( v1.average > v2.average ) 
+				return 1;
+			if ( v1.average < v2.average ) 
+				return -1;
 			return 0;
 		}
 	}
 	
-	public static void insertVideo(PriorityQueue q, String genre, double average, int topK) {
+	public static void insertVideo(PriorityQueue q, String category, double rating, int topK) {
 		Video video_head = (Video) q.peek();
-		if ( q.size() < topK || video_head.average < average ) {
-			Video video = new Video(genre, average);
+		if (q.size() < topK || video_head.rating < rating) {
+			Video video = new Video(category, rating);
 			q.add(video);
 			
 			if(q.size() > topK) q.remove();
@@ -53,19 +53,11 @@ public class YouTubeStudent20200953 {
 	
 	public static class YoutubeMapper extends Mapper<Object, Text, Text, DoubleWritable> {
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-			StringTokenizer itr = new StringTokenizer(value.toString(), "|");
-			String genre = "";
-			String rate = "";
-			int count = 0;
-			
-			while(itr.hasMoreTokens()) {
-				rate = itr.nextToken();
-				if(i == 3) 
-					genre = rate;
-				count++;
-			}
-			
-			context.write(new Text(genre), new DoubleWritable(Double.valueOf(rate)));
+			String[] splt = value.toString().split("\\|");
+            		String category = splt[3];
+            		double rating = Double.parseDouble(splt[6]);
+
+            		context.write(new Text(category), new DoubleWritable(rating));
 		}
 	}
 	
@@ -82,7 +74,7 @@ public class YouTubeStudent20200953 {
 				i++;
 			}
 			
-			double average = total / i;
+			double average = total / (double) i;
 			
 			insertVideo(queue, key.toString(), average, topK);
 		}
@@ -96,7 +88,7 @@ public class YouTubeStudent20200953 {
 		protected void cleanup(Context context) throws IOException, InterruptedException {
 			while(queue.size() != 0) {
 				Video video = (Video) queue.remove();
-				context.write(new Text(video.getGenre()), new DoubleWritable(video.getAverage()));
+				context.write(new Text(video.getCategory()), new DoubleWritable(video.getRating()));
 			}
 		}
 	}
@@ -113,8 +105,7 @@ public class YouTubeStudent20200953 {
 		Job job = new Job(conf, "YouTubeStudent20200953");
 		job.setJarByClass(YouTubeStudent20200953.class);
 		job.setMapperClass(YoutubeMapper.class);
-		job.setReducerClass(YoutubeReducer.class);
-		job.setNumReduceTasks(1);	
+		job.setReducerClass(YoutubeReducer.class);	
 		
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(DoubleWritable.class);
