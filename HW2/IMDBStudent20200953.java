@@ -11,17 +11,18 @@ import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 public class IMDBStudent20200953 {
+
     public static class IMDB {
-        public String name;
+        public String movie;
         public double rating;
 
-        public IMDB(String name, double rating) {
-            this.name = name;
+        public IMDB(String movie, double rating) {
+            this.movie = movie;
             this.rating = rating;
         }
 
-        public String getName() {
-            return this.name;
+        public String getMovie() {
+            return this.movie;
         }
 
         public Double getRating() {
@@ -53,7 +54,7 @@ public class IMDBStudent20200953 {
             DoubleString o = (DoubleString) o1;
             int ret = joinKey.compareTo( o.joinKey );
             if (ret != 0) return ret;
-            return tableName.compareTo( o.tableName );
+            return tableName.compareTo( o.tableName);
         }
 
         public String toString() { return joinKey + " " + tableName; }
@@ -68,12 +69,14 @@ public class IMDBStudent20200953 {
         public int compare(WritableComparable w1, WritableComparable w2) {
             DoubleString k1 = (DoubleString)w1;
             DoubleString k2 = (DoubleString)w2;
+            
             int result = k1.joinKey.compareTo(k2.joinKey);
             if (0 == result) {
                 result = k1.tableName.compareTo(k2.tableName);
             }
             return result;
         }
+
     }
 
     public static class FirstPartitioner extends Partitioner<DoubleString, Text> {
@@ -95,10 +98,11 @@ public class IMDBStudent20200953 {
     }
 
     public static class IMDBComparator implements Comparator<IMDB> {
+        @Override
         public int compare(IMDB m1, IMDB m2) {
             if (m1.rating > m2.rating) {
                 return 1;
-            } else if (m1.rating < m2.rating) {
+            } else if (o1.rating < o2.rating) {
                 return -1;
             } else {
                 return 0;
@@ -117,6 +121,7 @@ public class IMDBStudent20200953 {
 
     public static class IMDBMapper extends Mapper<Object, Text, DoubleString, Text> {
         boolean movieFile = true;
+        
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String[] splt = value.toString().split("::");
             DoubleString outputKey = new DoubleString();
@@ -150,6 +155,7 @@ public class IMDBStudent20200953 {
                 outputValue.set("Ratings::" + rating);
                 context.write( outputKey, outputValue );
             }
+
         }
 
         protected void setup(Context context) throws IOException, InterruptedException {
@@ -163,10 +169,12 @@ public class IMDBStudent20200953 {
         private PriorityQueue<IMDB> queue;
         private Comparator<IMDB> comp = new IMDBComparator();
         private int topK;
+        
         public void reduce(DoubleString key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+            String title = "";
             double total = 0;
             int count = 0;
-            String title = "";
+            
             for (Text val : values) {
                 String[] splt = val.toString().split("::");
                 String file_type = splt[0];
@@ -191,13 +199,13 @@ public class IMDBStudent20200953 {
         protected void setup(Context context) throws IOException, InterruptedException {
             Configuration conf = context.getConfiguration();
             topK = conf.getInt("topK", -1);
-            queue = new PriorityQueue<IMDB>(topK , comp);
+            queue = new PriorityQueue<IMDB>( topK , comp );
         }
 
         protected void cleanup(Context context) throws IOException, InterruptedException {
             while(queue.size() != 0) {
-                IMDB imdb = (IMDB)queue.remove();
-                context.write(new Text(imdb.getName()), new DoubleWritable(imdb.getRating()));
+                IMDB imdb = (IMDB) queue.remove();
+                context.write(new Text(imdb.getMovie()), new DoubleWritable(imdb.getRating()));
             }
         }
     }
@@ -209,6 +217,7 @@ public class IMDBStudent20200953 {
             System.err.println("Usage: IMDBStudent20200953 <in> <out>");
             System.exit(2);
         }
+
         conf.setInt("topK", Integer.valueOf(otherArgs[2]));
         Job job = new Job(conf, "IMDBStudent20200953");
         job.setJarByClass(IMDBStudent20200953.class);
@@ -226,3 +235,4 @@ public class IMDBStudent20200953 {
         FileSystem.get(job.getConfiguration()).delete( new Path(otherArgs[1]), true);
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
+}
