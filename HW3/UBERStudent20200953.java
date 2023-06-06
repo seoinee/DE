@@ -27,11 +27,11 @@ public final class UBERStudent20200953 {
             public Tuple2<String, String> call(String s) {
                 StringTokenizer itr = new StringTokenizer(s, ",");
                 String region = itr.nextToken();
-                String date = itr.nextToken();
+                String tmpDate = itr.nextToken();
                 String vehicles = itr.nextToken();
                 String trips = itr.nextToken();
 
-                itr = new StringTokenizer(date, "/");
+                itr = new StringTokenizer(tmpDate, "/");
                 int month = Integer.parseInt(itr.nextToken());
                 int day = Integer.parseInt(itr.nextToken());
                 int year = Integer.parseInt(itr.nextToken());
